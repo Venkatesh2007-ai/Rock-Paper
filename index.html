@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber RPS — Ultimate Rock Paper Scissors Battle</title>
+  <meta name="description" content="Play the ultimate interactive Rock Paper Scissors game against a smart AI. Features live animations, sound effects, streaks, and match modes!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Canvas Confetti Library for high performance celebrations -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="bg-orb orb-primary"></div>
+  <div class="bg-orb orb-secondary"></div>
+  <div class="bg-orb orb-tertiary"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="game-header">
+      <div class="brand">
+        <span class="brand-badge">BATTLE ARENA</span>
+        <h1 class="game-title">ROCK <span class="accent-text">PAPER</span> SCISSORS</h1>
+      </div>
+
+      <!-- Controls bar: Game mode, Sound toggle, Reset -->
+      <div class="header-controls">
+        <div class="mode-selector" id="modeSelector" role="group" aria-label="Game Mode">
+          <button type="button" class="mode-btn active" data-mode="endless" id="modeEndless">Endless</button>
+          <button type="button" class="mode-btn" data-mode="best3" id="modeBest3">Best of 3</button>
+          <button type="button" class="mode-btn" data-mode="best5" id="modeBest5">Best of 5</button>
+        </div>
+
+        <button type="button" class="icon-btn" id="soundToggle" aria-label="Toggle Sound" title="Toggle Sound (M)">
+          <span class="icon" id="soundIcon">🔊</span>
+        </button>
+
+        <button type="button" class="icon-btn" id="resetBtn" aria-label="Reset Game" title="Reset Score">
+          <span class="icon">🔄</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scoreboard & Streak Bar -->
+    <section class="stats-bar" aria-label="Game Statistics">
+      <div class="stat-card player-stat">
+        <div class="stat-avatar user-avatar">
+          <span>👤</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">YOU</span>
+          <span class="stat-value" id="userScore">0</span>
+        </div>
+      </div>
+
+      <div class="match-meta">
+        <div class="streak-badge" id="streakBadge" title="Current Win Streak">
+          <span class="flame-icon">🔥</span>
+          <span id="streakCount">0</span> Streak
+        </div>
+        <div class="target-badge" id="targetBadge">FIRST TO 2 WINS</div>
+      </div>
+
+      <div class="stat-card ai-stat">
+        <div class="stat-info text-right">
+          <span class="stat-label">CPU (NEXUS AI)</span>
+          <span class="stat-value" id="aiScore">0</span>
+        </div>
+        <div class="stat-avatar ai-avatar">
+          <span>🤖</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Battle Arena -->
+    <main class="battle-arena" id="battleArena">
+      <!-- Player Battle Zone -->
+      <div class="fighter-zone user-zone" id="userZone">
+        <div class="fighter-glow"></div>
+        <div class="fighter-display" id="userFighterDisplay">
+          <div class="hand-symbol" id="userHand">✊</div>
+          <span class="fighter-choice-name" id="userChoiceName">Ready</span>
+        </div>
+        <div class="zone-tag">YOU</div>
+      </div>
+
+      <!-- Center VS & Announcement Stage -->
+      <div class="stage-center">
+        <div class="vs-circle" id="vsIndicator">VS</div>
+        <div class="countdown-display hidden" id="countdownDisplay">3</div>
+        <div class="round-verdict" id="roundVerdict">
+          <span class="verdict-tag" id="verdictTag">PICK YOUR WEAPON</span>
+          <p class="verdict-detail" id="verdictDetail">First to throw takes the lead!</p>
+        </div>
+      </div>
+
+      <!-- AI Battle Zone -->
+      <div class="fighter-zone ai-zone" id="aiZone">
+        <div class="fighter-glow"></div>
+        <div class="fighter-display" id="aiFighterDisplay">
+          <div class="hand-symbol" id="aiHand">✊</div>
+          <span class="fighter-choice-name" id="aiChoiceName">Ready</span>
+        </div>
+        <div class="zone-tag">CPU</div>
+      </div>
+    </main>
+
+    <!-- Weapon Selection Deck -->
+    <section class="weapon-deck" aria-label="Weapon Choices">
+      <div class="deck-helper">
+        <span>Click a weapon or use keys <kbd>R</kbd> / <kbd>P</kbd> / <kbd>S</kbd></span>
+      </div>
+
+      <div class="weapons-grid">
+        <!-- Rock Button -->
+        <button type="button" class="weapon-card" id="btnRock" data-choice="rock" aria-label="Rock">
+          <div class="weapon-key-badge">R / 1</div>
+          <div class="weapon-icon-wrap rock-glow">
+            <span class="weapon-emoji">🪨</span>
+          </div>
+          <div class="weapon-info">
+            <h3 class="weapon-name">Rock</h3>
+            <span class="weapon-beats">Beats Scissors</span>
+          </div>
+          <div class="card-highlight"></div>
+        </button>
+
+        <!-- Paper Button -->
+        <button type="button" class="weapon-card" id="btnPaper" data-choice="paper" aria-label="Paper">
+          <div class="weapon-key-badge">P / 2</div>
+          <div class="weapon-icon-wrap paper-glow">
+            <span class="weapon-emoji">📄</span>
+          </div>
+          <div class="weapon-info">
+            <h3 class="weapon-name">Paper</h3>
+            <span class="weapon-beats">Beats Rock</span>
+          </div>
+          <div class="card-highlight"></div>
+        </button>
+
+        <!-- Scissors Button -->
+        <button type="button" class="weapon-card" id="btnScissors" data-choice="scissors" aria-label="Scissors">
+          <div class="weapon-key-badge">S / 3</div>
+          <div class="weapon-icon-wrap scissors-glow">
+            <span class="weapon-emoji">✂️</span>
+          </div>
+          <div class="weapon-info">
+            <h3 class="weapon-name">Scissors</h3>
+            <span class="weapon-beats">Beats Paper</span>
+          </div>
+          <div class="card-highlight"></div>
+        </button>
+      </div>
+    </section>
+
+    <!-- Secondary Stats & Battle History -->
+    <section class="footer-panels">
+      <div class="history-panel glass-card">
+        <div class="panel-header">
+          <h2 class="panel-title">Battle History</h2>
+          <span class="history-count" id="roundCount">0 Rounds</span>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty" id="emptyHistoryMsg">No rounds played yet. Make your first move!</div>
+        </div>
+      </div>
+
+      <div class="metrics-panel glass-card">
+        <div class="panel-header">
+          <h2 class="panel-title">Performance Matrix</h2>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <span class="metric-label">Win Rate</span>
+            <span class="metric-val" id="winRateVal">0%</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Best Streak</span>
+            <span class="metric-val" id="bestStreakVal">0</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Draws</span>
+            <span class="metric-val" id="drawCountVal">0</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Total Battles</span>
+            <span class="metric-val" id="totalBattlesVal">0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal for Series Championship End (Best of 3 / Best of 5) -->
+  <div class="modal-backdrop hidden" id="matchModal">
+    <div class="modal-card">
+      <div class="modal-banner" id="modalBanner">VICTORY!</div>
+      <div class="modal-icon" id="modalIcon">🏆</div>
+      <h2 class="modal-heading" id="modalHeading">Series Champion!</h2>
+      <p class="modal-subtext" id="modalSubtext">You defeated Nexus AI 2 to 1 in this tournament.</p>
+      <div class="modal-actions">
+        <button type="button" class="action-btn primary" id="modalPlayAgainBtn">Play Next Match</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
